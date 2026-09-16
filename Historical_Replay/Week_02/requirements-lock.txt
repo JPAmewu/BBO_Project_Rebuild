@@ -1,0 +1,27 @@
+# Reproducibility lock file — Week 2 EDA / GP surrogate notebooks
+#
+# Exact package versions actually installed and used to execute the 8
+# `Historical_Replay/Week_02/Function_0X/01_Notebook/week_02_eda_gp_surrogate.ipynb`
+# notebooks in this environment, at the time of the remediation pass that
+# added this file. Versions below were queried directly from the installed
+# environment (`python3 --version`, `pip3 show <package>`) — not guessed or
+# copied from memory.
+#
+# random_state is separately fixed per notebook (42 + function_number,
+# i.e. 43-50); this file only pins the software environment, not the
+# per-notebook seeds.
+
+python==3.14.3
+
+numpy==2.5.2
+scipy==1.18.1
+scikit-learn==1.9.0
+matplotlib==3.11.2
+seaborn==0.13.2
+
+jupyter==1.1.1
+jupyter_core==5.9.1
+nbformat==5.11.1
+nbclient==0.11.0
+nbconvert==7.17.1
+ipykernel==7.3.0

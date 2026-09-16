@@ -1,0 +1,6 @@
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+.DS_Store
+__pycache__/
+*.pyc
+Week_01/Function_01/01_Notebook/Untitled.ipynb
