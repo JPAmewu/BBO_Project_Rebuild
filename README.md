@@ -129,5 +129,6 @@ and limitations.
 - **Every deliverable in this project has been independently re-verified**
   by a separate review pass before being treated as final, catching real
   issues (a missing file-write step, a checksum-transcription error, an
-  incorrect severity attribution in an earlier review) that a single pass
+  incorrect kernel attribution in an earlier review — a warning count was
+  initially attributed entirely to the wrong GP kernel) that a single pass
   would likely have missed.
