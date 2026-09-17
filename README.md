@@ -124,16 +124,16 @@ rule, not an inference (see `CLAUDE.md` rules 17–18).
 ## Section 4: Technical Approach (Living Record)
 
 **This section is explicitly a living record and will be updated as the
-project's approach evolves.** As of this writing, it covers three rounds
+project's approach evolves.** As of this writing, it covers five rounds
 of work — but an important clarification comes first.
 
-### Important clarification on "three query submissions"
+### Important clarification on "five query submissions"
 
 Only **one real query has ever been generated for live submission** in
 this project: the Week 1 random-search baseline
-(`Week_01/Function_0X/03_Queries/week_01_query.txt`). No second or third
-live query has been produced from this repository. What has actually
-progressed through three rounds is a separate, clearly-labelled
+(`Week_01/Function_0X/03_Queries/week_01_query.txt`). No second, third,
+fourth, or fifth live query has been produced from this repository. What
+has actually progressed through five rounds is a separate, clearly-labelled
 **retrospective learning track** (`Historical_Replay/`), built entirely on
 genuine historical query-output data imported and independently verified
 from the original source project — never fabricated, never conflated with
@@ -196,6 +196,50 @@ since it is the actual technical work completed so far.
   `Historical_Replay/Week_03/WEEK_03_METHOD.md`,
   `Historical_Replay/Week_03/CODE_REVIEW_SUMMARY.md`.
 
+### Round 4 (Historical Replay Week 4) — Same method, one function's instability worsens
+
+- **Method**: identical GP setup and convergence-aware selection rule as
+  Round 3, applied again to all eight functions on their Week 4 cumulative
+  data.
+- **Result**: all eight functions converged cleanly for both kernels except
+  Function_05, whose optimizer instability worsened rather than resolved —
+  RBF showed 5 of 6 restarts fail (up from 3 of 6 in Round 3), Matérn showed
+  3 of 6 (down from 5 of 6). Matérn was selected per the rule (fewer failed
+  restarts), but explicitly documented as not a clean, fully reliable fit.
+  Function_07's kernel preference flipped from RBF (Round 3) to Matérn
+  (Round 4) — an ordinary log-marginal-likelihood tie-break on two cleanly
+  converged fits, not an instability finding.
+- Full detail: `Historical_Replay/Week_04/STRATEGY_REFLECTION.md`,
+  `Historical_Replay/Week_04/CODE_REVIEW_SUMMARY.md`,
+  `Historical_Replay/Week_04/HISTORICAL_IMPORT_VALIDATION.md`.
+
+### Round 5 (Historical Replay Week 5) — Function_05 remains unresolved; a fourth consecutive week of instability
+
+- **Method**: identical GP setup and convergence-aware selection rule as
+  Rounds 3–4, applied to all eight functions on their Week 5 cumulative
+  data (row counts 14, 14, 19, 34, 24, 24, 34, 44 for Functions 01–08).
+- **Result**: all seven other functions converged cleanly for both kernels
+  (0 of 6 restarts failed), with kernel choice resolved purely by
+  log-marginal-likelihood; Function_07's Matérn preference held steady.
+  Function_05 showed RBF 4 of 6 restarts failed (improved from 5 of 6 in
+  Round 4) and Matérn 4 of 6 (worsened from 3 of 6) — an equal, non-zero
+  count on both sides, so per the convergence-aware rule **neither kernel
+  is selected**; both are reported as exploratory only. This is the fourth
+  consecutive round (Weeks 2–5) this function has shown genuine optimizer
+  instability, and the trend across rounds has not resolved in either
+  direction:
+
+  | Round | RBF ABNORMAL | Matérn ABNORMAL | Outcome |
+  |---|---|---|---|
+  | Week 2 | 1/6 | (not separately flagged) | RBF selected |
+  | Week 3 | 3/6 | 5/6 | RBF selected (fewer failures) |
+  | Week 4 | 5/6 | 3/6 | Matérn selected (fewer failures) |
+  | Week 5 | 4/6 | 4/6 | **Neither selected — both exploratory only** |
+
+- Full detail: `Historical_Replay/Week_05/STRATEGY_REFLECTION.md`,
+  `Historical_Replay/Week_05/CODE_REVIEW_SUMMARY.md`,
+  `Historical_Replay/Week_05/CUMULATIVE_DATA_VALIDATION.md`.
+
 ### How exploration and exploitation are balanced
 
 No acquisition function has been implemented yet, so this balance has not
@@ -236,6 +280,7 @@ BBO_Project_Rebuild/
 ├── README.md                          — this file
 ├── DATASHEET.md                       — data description, limitations, context
 ├── MODEL_CARD.md                      — model behaviour, assumptions, limitations
+├── SOFTWARE_ARCHITECTURE.md           — repository architecture and design rationale
 ├── CLAUDE.md                          — permanent project rules
 ├── HISTORICAL_REPLAY_INVENTORY.md     — inventory of the original project's historical records
 ├── HISTORICAL_REPLAY_PROTOCOL.md      — rules governing use of historical data
@@ -249,7 +294,9 @@ BBO_Project_Rebuild/
 └── Historical_Replay/                 — retrospective learning track (see Section 4)
     ├── Week_01/                       — genuine historical Week 1 pairs (verified imports)
     ├── Week_02/                       — cumulative data + first GP surrogate notebooks
-    └── Week_03/                       — cumulative data + convergence-aware GP diagnostics
+    ├── Week_03/                       — cumulative data + convergence-aware GP diagnostics
+    ├── Week_04/                       — cumulative data + GP diagnostics (Function_05 instability worsens)
+    └── Week_05/                       — cumulative data + GP diagnostics (Function_05 unresolved, 4th week running)
 ```
 
 ## Data Availability
@@ -264,14 +311,18 @@ Every substantive step in this project — data audits, methodology
 verification, code review, remediation, and independent re-evaluation — is
 recorded in its own dated document alongside the code it covers, following
 this project's permanent rules in `CLAUDE.md`. See `DATASHEET.md` for data
-details and `MODEL_CARD.md` for the current model's behaviour, assumptions,
-and limitations.
+details, `MODEL_CARD.md` for the current model's behaviour, assumptions,
+and limitations, and `SOFTWARE_ARCHITECTURE.md` for how this repository
+itself is structured and why.
 
-## Current Best Observed Result, Per Function (Week 1 Starter Data)
+## Best Observed Result, Per Function
+
+### Original starter dataset (Week 1) — historical reference only
 
 These are the best values observed in each function's original starter
 dataset (`Week_01/Function_0X/02_Data/initial_*.npy`) — not yet informed by
-any model-guided query:
+any model-guided query, and **superseded for Functions 04, 07, and 08** by
+later `Historical_Replay` cumulative data (see table below):
 
 | Function | Dimensions | Best output observed | Best input observed |
 |---|---|---|---|
@@ -283,3 +334,23 @@ any model-guided query:
 | Function_06 | 5 | -0.714265 | [0.728186, 0.154693, 0.732552, 0.693997, 0.056401] |
 | Function_07 | 6 | 1.364968 | [0.057896, 0.491672, 0.247422, 0.218118, 0.420428, 0.730970] |
 | Function_08 | 8 | 9.598482 | [0.056447, 0.065956, 0.022929, 0.038786, 0.403935, 0.801055, 0.488307, 0.893085] |
+
+### Current — Historical_Replay Week 5 cumulative data (retrospective track only)
+
+These are the best values observed across each function's full
+`Historical_Replay/Week_05` cumulative dataset (row counts 14, 14, 19, 34,
+24, 24, 34, 44 for Functions 01–08) — this reflects the retrospective
+track's accumulated genuine historical data, **not** a result of any
+model-guided query this project has generated (no acquisition function
+has been implemented yet):
+
+| Function | Dimensions | Best output observed | Best input observed | Changed vs. starter table? |
+|---|---|---|---|---|
+| Function_01 | 2 | 7.710875e-16 | [0.731024, 0.733000] | No |
+| Function_02 | 2 | 0.611205 | [0.702637, 0.926564] | No |
+| Function_03 | 3 | -0.034835 | [0.492581, 0.611593, 0.340176] | No |
+| Function_04 | 4 | -1.981075 | [0.394519, 0.361122, 0.256803, 0.461856] | **Yes — improved** |
+| Function_05 | 4 | 1088.859618 | [0.224189, 0.846480, 0.879484, 0.878516] | No |
+| Function_06 | 5 | -0.714265 | [0.728186, 0.154693, 0.732552, 0.693997, 0.056401] | No |
+| Function_07 | 6 | 2.149905 | [0.143585, 0.302559, 0.571101, 0.194533, 0.395561, 0.815792] | **Yes — improved** |
+| Function_08 | 8 | 9.939904 | [0.163160, 0.184786, 0.152644, 0.083802, 0.999322, 0.544113, 0.184124, 0.123846] | **Yes — improved** |

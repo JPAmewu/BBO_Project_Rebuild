@@ -101,9 +101,15 @@ definitions are unknown and the dataset is deliberately small.
   with either genuine stochastic noise or high local curvature; this
   cannot be distinguished without querying the true function again.
 - **Sample sizes remain small relative to dimensionality** for several
-  functions (e.g. 21 observations for a 4-dimensional function, 41 for an
-  8-dimensional one), which limits the reliability of any fitted model's
-  uncertainty estimates, especially early in the project.
+  functions. As of `Historical_Replay/Week_05` (the current furthest
+  point), per-function cumulative counts range from 14 (Functions 01–02,
+  d=2) to 44 (Function_08, d=8) — e.g. 24 observations for a
+  4-dimensional function (Function_05), 44 for an 8-dimensional one
+  (Function_08) — which limits the reliability of any fitted model's
+  uncertainty estimates, especially for the higher-dimensional functions.
+  This range grows by one observation per function each completed
+  `Historical_Replay` week; see that week's own `CODE_REVIEW_SUMMARY.md`
+  for the exact current counts.
 - **Historical data quarantine**: within the historical retrospective
   track only, Week 12's source records directly contradict each other
   about whether a genuine return exists — this week is explicitly

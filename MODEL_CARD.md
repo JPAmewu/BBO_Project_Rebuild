@@ -31,8 +31,8 @@ across functions (`CLAUDE.md` rule 2).
 
 - **Method**: `sklearn.gaussian_process.GaussianProcessRegressor`, fit
   separately per function on that function's cumulative data (original
-  starter set plus, in this exploratory track, one appended historical
-  observation).
+  starter set plus one appended genuine historical observation per
+  completed `Historical_Replay` week — currently four, through Week_05).
 - **Kernel**: two variants fit and compared per function —
   `ConstantKernel * RBF + WhiteKernel` and
   `ConstantKernel * Matern(nu=2.5) + WhiteKernel`.
@@ -42,11 +42,18 @@ across functions (`CLAUDE.md` rule 2).
   inverse-transformed back to the original scale.
 - **Hyperparameter fitting**: maximum marginal likelihood, `random_state =
   42 + function_number`, `n_restarts_optimizer = 5`.
+- **Convergence-aware kernel selection**: since Week_03, applied
+  identically to all eight functions — prefer the kernel with fewer failed
+  optimizer restarts; if both converge cleanly, prefer higher
+  log-marginal-likelihood; if neither converges reliably, select neither
+  and report both as exploratory only (see Assumptions and Limitations
+  below for Function_05, the function this has applied to every week).
 - **Status**: this model has been fit and its posterior (mean and
-  uncertainty) visualised, but **has not yet been used to generate or
-  submit any query** — no acquisition function has been applied. It exists
-  only within the separate `Historical_Replay/Week_02/` retrospective
-  track, fit on genuine historical data, not on live portal feedback.
+  uncertainty) visualised every week, but **has not yet been used to
+  generate or submit any query** — no acquisition function has been
+  applied. It exists only within the separate `Historical_Replay/Week_02`
+  through `Week_05` retrospective track, fit on genuine historical data,
+  not on live portal feedback.
 
 ## Intended Use
 
@@ -64,7 +71,8 @@ exercise.
 
 Described fully in `DATASHEET.md`. In brief: 10–40 starter observations
 per function (varies by function), plus, for the GP surrogate work only,
-one additional genuine historical observation per function drawn from the
+four additional genuine historical observations per function (one per
+completed `Historical_Replay` week, currently Weeks 2–5) drawn from the
 retrospective learning track. The random-search baseline uses no training
 data at all beyond checking for duplicates and bounds.
 
@@ -72,11 +80,12 @@ data at all beyond checking for duplicates and bounds.
 
 No formal quantitative evaluation (e.g. held-out validation, calibration
 check, or cross-validation) has been performed on the GP surrogate models
-yet — this is explicitly disclosed in every Week 2 notebook's own
-interpretation text: kernel comparisons (RBF vs. Matérn, by
-log-marginal-likelihood) are described as "exploratory evidence, not a
-validated model-selection result," given the very small sample sizes
-involved (11–41 points across 2–8 dimensions).
+yet — this is explicitly disclosed in every `Historical_Replay` week's own
+notebooks, consistently from Week 2 through the current Week 5: kernel
+comparisons (RBF vs. Matérn, by log-marginal-likelihood) are described as
+"exploratory evidence, not a validated model-selection result," given the
+very small sample sizes involved (currently 14–44 points across 2–8
+dimensions).
 
 ## Assumptions and Limitations
 
@@ -86,27 +95,41 @@ involved (11–41 points across 2–8 dimensions).
   near-duplicate query pair with a non-zero output difference) — not
   assumed away, but also not proven to be homoscedastic or well-calibrated
   with this little data.
-- **Small-sample instability**: Function_05's RBF-kernel fit showed
-  genuine L-BFGS-B optimizer non-convergence (1 of 6 restarts for RBF; 3 of
-  6 for Matérn) — documented transparently, with a convergence-aware
-  selection rule applied (prefer the kernel with fewer non-converged
-  restarts) rather than defaulting to raw log-marginal-likelihood, which
-  would have picked the less numerically reliable fit for this function.
-  This is the clearest example in the project so far of a model result that
-  should not be trusted with the same confidence as the other seven
-  functions' fits.
-- **ARD length-scale saturation**: several functions had at least one
+- **Small-sample instability**: Function_05 has shown genuine L-BFGS-B
+  optimizer non-convergence in every `Historical_Replay` week to date, and
+  the trend has not resolved in either direction:
+
+  | Round | RBF ABNORMAL | Matérn ABNORMAL | Outcome |
+  |---|---|---|---|
+  | Week 2 | 1/6 | (not separately flagged) | RBF selected |
+  | Week 3 | 3/6 | 5/6 | RBF selected (fewer failures) |
+  | Week 4 | 5/6 | 3/6 | Matérn selected (fewer failures) |
+  | Week 5 (current) | 4/6 | 4/6 | **Neither selected — both exploratory only** |
+
+  As of Week 5, both kernels fail an equal, non-zero number of restarts,
+  so per the convergence-aware rule neither is selected as "the model" for
+  this function — both are reported as exploratory only. This remains the
+  clearest example in the project of a model result that should not be
+  trusted with the same confidence as the other seven functions' fits.
+- **ARD length-scale saturation**: several functions have at least one
   input dimension's fitted length-scale converge to the search-space upper
-  bound (e.g. Function_01's 2nd dimension, Function_07's 2nd and 3rd,
-  Function_08's 8th) — indicating the current data doesn't constrain the
-  model's belief about that dimension much, which should not be
-  over-interpreted as "the function truly doesn't depend on that
-  dimension."
+  bound. As of Week_05: Function_01's **1st** dimension (this has shifted
+  from the 2nd dimension observed at Week_02, as more data has been
+  appended — a reminder that this diagnosis is itself provisional and can
+  change as the dataset grows), Function_07's 2nd and 3rd dimensions, and
+  Function_08's 8th dimension. This indicates the current data doesn't
+  constrain the model's belief about that dimension much, which should not
+  be over-interpreted as "the function truly doesn't depend on that
+  dimension" — nor should the specific dimension currently flagged be
+  assumed to stay fixed as more data is added.
 - **No acquisition function implemented yet** — this model card describes
   a surrogate, not yet a complete optimisation strategy.
 - **Reproducibility**: seeds are fixed and recorded throughout, and
-  library versions used for the GP work are pinned in
-  `Historical_Replay/Week_02/requirements-lock.txt`; exact bit-for-bit
+  library versions used for the GP work are pinned in each week's own
+  `requirements-lock.txt` (e.g. `Historical_Replay/Week_05/requirements-lock.txt`
+  for the current environment) — confirmed byte-identical across Week_02
+  through Week_05 (Python 3.14.3, numpy 2.5.2, scipy 1.18.1, scikit-learn
+  1.9.0, matplotlib 3.11.2, seaborn 0.13.2); exact bit-for-bit
   reproducibility across different environments is not otherwise
   guaranteed.
 
@@ -119,11 +142,14 @@ uncertainty band. This serves a similar interpretive role to individual
 coefficient effects in a linear model: it shows, dimension by dimension,
 where the model currently believes the function is sensitive versus flat,
 and — critically — where that flatness is a genuine property of the data
-versus simply a lack of information so far (see
-`Historical_Replay/Week_02/STRATEGY_REFLECTION.md` for a fuller discussion,
-including a comparison against what a simple linear/logistic model would
-assume and where those assumptions would likely be violated for these
-functions).
+versus simply a lack of information so far. This disclosure is consistent
+from `Historical_Replay/Week_02/STRATEGY_REFLECTION.md` (the original
+discussion, including a comparison against what a simple linear/logistic
+model would assume and where those assumptions would likely be violated
+for these functions) through the current `Week_05/STRATEGY_REFLECTION.md`,
+which extends it by connecting the resolved-versus-pinned-at-bound
+length-scale distinction directly to how a future acquisition function
+should weight exploration once implemented.
 
 ## Ethical and Safety Considerations
 
